@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"hexagonal-potato/domain"
+	"hexagonal-potato/logger"
 	"net/http"
 )
 
@@ -23,6 +24,7 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) {
 	CreateUser(user)
 
 	w.WriteHeader(http.StatusCreated)
+	logger.AppLogger.Print("Created User with id = ", user.ID)
 	json.NewEncoder(w).Encode(user)
 }
 
@@ -40,7 +42,7 @@ func getUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	res := GetUser(user)
-
+	logger.AppLogger.Print("Return User with id = ", user.ID)
 	json.NewEncoder(w).Encode(res)
 }
 
@@ -55,14 +57,18 @@ func updateUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	UpdateUser(updatedUser)
+	logger.AppLogger.Print("Updated User with id = ", updatedUser.ID)
 	json.NewEncoder(w).Encode(updatedUser)
 }
 
 func deleteUserHandler(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Query().Get("id")
 	var deletedUser domain.AuthUser
-	deletedUser.ID = id
+	if err := json.NewDecoder(r.Body).Decode(&deletedUser); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
 	DeleteUser(deletedUser)
+	logger.AppLogger.Print("Deleted User with id = ", deletedUser.ID)
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -74,6 +80,7 @@ func listUsers(w http.ResponseWriter, _r *http.Request) {
 	if err != nil {
 		errors.New("An error happened when listing users")
 	}
+	logger.AppLogger.Print("Ouputted users", data)
 	w.Write(data)
 }
 
