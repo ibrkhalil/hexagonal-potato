@@ -80,7 +80,7 @@ func listUsers(w http.ResponseWriter, _r *http.Request) {
 	if err != nil {
 		errors.New("An error happened when listing users")
 	}
-	logger.AppLogger.Print("Ouputted users", data)
+	logger.AppLogger.Print("Outputted full users list")
 	w.Write(data)
 }
 
